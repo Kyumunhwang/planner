@@ -13,6 +13,7 @@ interface BlockModalProps {
   block?: TimeBlock;
   defaultStartSlot?: number;
   defaultEndSlot?: number;
+  readOnly?: boolean;
 }
 
 const NEW_CATEGORY_SENTINEL = '__new__';
@@ -39,6 +40,7 @@ export default function BlockModal({
   block,
   defaultStartSlot,
   defaultEndSlot,
+  readOnly = false,
 }: BlockModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const isEditing = !!block;
@@ -236,15 +238,17 @@ export default function BlockModal({
             <label className={styles.label}>유형</label>
             <div className={styles.typeToggle}>
               <button
-                className={`${styles.typeBtn} ${type === 'plan' ? styles.typeBtnActive : ''}`}
-                onClick={() => setType('plan')}
+                className={`${styles.typeBtn} ${type === 'plan' ? styles.typeBtnActive : ''} ${readOnly ? styles.disabledBtn : ''}`}
+                onClick={() => !readOnly && setType('plan')}
+                disabled={readOnly}
                 type="button"
               >
                 계획
               </button>
               <button
-                className={`${styles.typeBtn} ${type === 'log' ? styles.typeBtnActive : ''}`}
-                onClick={() => setType('log')}
+                className={`${styles.typeBtn} ${type === 'log' ? styles.typeBtnActive : ''} ${readOnly ? styles.disabledBtn : ''}`}
+                onClick={() => !readOnly && setType('log')}
+                disabled={readOnly}
                 type="button"
               >
                 기록
@@ -260,8 +264,9 @@ export default function BlockModal({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="일정 제목을 입력하세요"
-              autoFocus
+              placeholder={readOnly ? '제목이 없습니다' : '일정 제목을 입력하세요'}
+              disabled={readOnly}
+              autoFocus={!readOnly}
             />
           </div>
 
@@ -277,18 +282,21 @@ export default function BlockModal({
                 className={styles.select}
                 value={showNewCategory ? NEW_CATEGORY_SENTINEL : category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
+                disabled={readOnly}
               >
                 {allCategories.map((cat) => (
                   <option key={cat.name} value={cat.name}>
                     {cat.name}
                   </option>
                 ))}
-                <option value={NEW_CATEGORY_SENTINEL}>
-                  + 새 카테고리 추가
-                </option>
+                {!readOnly && (
+                  <option value={NEW_CATEGORY_SENTINEL}>
+                    + 새 카테고리 추가
+                  </option>
+                )}
               </select>
             </div>
-            {showNewCategory && (
+            {showNewCategory && !readOnly && (
               <div className={styles.newCategoryRow}>
                 <input
                   className={styles.input}
@@ -322,6 +330,7 @@ export default function BlockModal({
                 className={styles.select}
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                disabled={readOnly}
               >
                 {TIME_OPTIONS.filter((o) => o.value !== '24:00').map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -337,6 +346,7 @@ export default function BlockModal({
                 className={styles.select}
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                disabled={readOnly}
               >
                 {validEndOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -354,7 +364,8 @@ export default function BlockModal({
               className={styles.textarea}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="상세 내용을 입력하세요 (선택)"
+              placeholder={readOnly ? '상세 내용이 없습니다' : '상세 내용을 입력하세요 (선택)'}
+              disabled={readOnly}
               rows={3}
             />
           </div>
@@ -368,7 +379,8 @@ export default function BlockModal({
                 role="switch"
                 aria-checked={isPriority}
                 className={`${styles.toggle} ${isPriority ? styles.toggleOn : ''}`}
-                onClick={() => setIsPriority((v) => !v)}
+                onClick={() => !readOnly && setIsPriority((v) => !v)}
+                disabled={readOnly}
               >
                 <span className={styles.toggleThumb} />
               </button>
@@ -378,32 +390,46 @@ export default function BlockModal({
 
         {/* ── Footer ── */}
         <div className={styles.footer}>
-          {isEditing && onDelete && (
-            <button
-              className={styles.deleteBtn}
-              onClick={handleDelete}
-              type="button"
-            >
-              삭제
-            </button>
+          {readOnly ? (
+            <div className={styles.footerRight} style={{ marginLeft: 'auto' }}>
+              <button
+                className={styles.saveBtn}
+                onClick={onClose}
+                type="button"
+              >
+                닫기
+              </button>
+            </div>
+          ) : (
+            <>
+              {isEditing && onDelete && (
+                <button
+                  className={styles.deleteBtn}
+                  onClick={handleDelete}
+                  type="button"
+                >
+                  삭제
+                </button>
+              )}
+              <div className={styles.footerRight}>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={onClose}
+                  type="button"
+                >
+                  취소
+                </button>
+                <button
+                  className={styles.saveBtn}
+                  onClick={handleSave}
+                  disabled={!title.trim()}
+                  type="button"
+                >
+                  {isEditing ? '수정' : '저장'}
+                </button>
+              </div>
+            </>
           )}
-          <div className={styles.footerRight}>
-            <button
-              className={styles.cancelBtn}
-              onClick={onClose}
-              type="button"
-            >
-              취소
-            </button>
-            <button
-              className={styles.saveBtn}
-              onClick={handleSave}
-              disabled={!title.trim()}
-              type="button"
-            >
-              {isEditing ? '수정' : '저장'}
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -1,16 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { AIAnalysis } from '@/types';
 
 interface AICoachCardProps {
   period: 'week' | 'month';
+  userId?: string;
 }
 
-export default function AICoachCard({ period }: AICoachCardProps) {
+export default function AICoachCard({ period, userId }: AICoachCardProps) {
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Reset analysis on student or period change
+  useEffect(() => {
+    setAnalysis(null);
+    setError(null);
+  }, [userId, period]);
 
   const fetchAnalysis = async () => {
     setLoading(true);
@@ -20,7 +27,7 @@ export default function AICoachCard({ period }: AICoachCardProps) {
       const res = await fetch('/api/ai/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ period }),
+        body: JSON.stringify({ period, userId }),
       });
 
       if (!res.ok) {

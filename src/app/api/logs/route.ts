@@ -39,13 +39,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'date 파라미터가 필요합니다.' }, { status: 400 });
     }
 
+    const targetUserId = searchParams.get('userId');
+    let queryUserId = session.user.user_id;
+
+    if (targetUserId && targetUserId !== session.user.user_id) {
+      const isTeacher = session.user.email === 'kyumun.hwang@gmail.com';
+      if (!isTeacher) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+      }
+      queryUserId = targetUserId;
+    }
+
     const logs = await requestQueue.enqueue(async () => {
       const data = await getSheetData('ACTUAL_LOGS');
       if (data.length <= 1) return [];
 
       return data
         .slice(1)
-        .filter((row) => row[1] === session.user.user_id && row[3] === date)
+        .filter((row) => row[1] === queryUserId && row[3] === date)
         .map(rowToLog);
     });
 

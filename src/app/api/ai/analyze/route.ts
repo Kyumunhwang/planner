@@ -58,13 +58,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { period } = body;
+    const { period, userId: targetUserId } = body;
 
     if (!period || !['week', 'month'].includes(period)) {
       return NextResponse.json(
         { error: "period는 'week' 또는 'month'이어야 합니다." },
         { status: 400 }
       );
+    }
+
+    let queryUserId = session.user.user_id;
+    if (targetUserId && targetUserId !== session.user.user_id) {
+      const isTeacher = session.user.email === 'kyumun.hwang@gmail.com';
+      if (!isTeacher) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+      }
+      queryUserId = targetUserId;
     }
 
     const dateRange = getDateRange(period, new Date());
@@ -80,7 +89,7 @@ export async function POST(request: NextRequest) {
         .slice(1)
         .filter((row) => {
           return (
-            row[1] === session.user.user_id &&
+            row[1] === queryUserId &&
             row[2] >= dateRange.start &&
             row[2] <= dateRange.end
           );
@@ -91,7 +100,7 @@ export async function POST(request: NextRequest) {
         .slice(1)
         .filter((row) => {
           return (
-            row[1] === session.user.user_id &&
+            row[1] === queryUserId &&
             row[3] >= dateRange.start &&
             row[3] <= dateRange.end
           );

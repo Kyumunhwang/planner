@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSession } from 'next-auth/react';
 import styles from './dashboard.module.css';
 import CategoryChart from '@/components/Dashboard/CategoryChart';
 import ExecutionRateChart from '@/components/Dashboard/ExecutionRateChart';
@@ -11,11 +12,33 @@ import type { StatsResponse, LeaderboardEntry } from '@/types';
 type Period = 'week' | 'month';
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [period, setPeriod] = useState<Period>('week');
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [leaderboardEntries, setLeaderboardEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Teacher & Student states
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [students, setStudents] = useState<{ user_id: string; email: string; name: string }[]>([]);
+
+  const isTeacher = useMemo(() => {
+    return session?.user?.email === 'kyumun.hwang@gmail.com';
+  }, [session]);
+
+  useEffect(() => {
+    if (isTeacher) {
+      fetch('/api/students')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.students) {
+            setStudents(data.students);
+          }
+        })
+        .catch((err) => console.error('Failed to load students:', err));
+    }
+  }, [isTeacher]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -23,8 +46,12 @@ export default function DashboardPage() {
 
     try {
       const today = new Date().toISOString().split('T')[0];
+      const statsUrl = selectedStudentId
+        ? `/api/stats?period=${period}&date=${today}&userId=${selectedStudentId}`
+        : `/api/stats?period=${period}&date=${today}`;
+
       const [statsRes, leaderboardRes] = await Promise.all([
-        fetch(`/api/stats?period=${period}&date=${today}`),
+        fetch(statsUrl),
         fetch('/api/leaderboard'),
       ]);
 
@@ -44,7 +71,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [period, selectedStudentId]);
 
   useEffect(() => {
     fetchData();
@@ -84,19 +111,41 @@ export default function DashboardPage() {
       {/* Header */}
       <header className={styles.header}>
         <h1 className={styles.title}>대시보드</h1>
-        <div className={styles.periodToggle}>
-          <button
-            className={`${styles.periodBtn} ${period === 'week' ? styles.periodBtnActive : ''}`}
-            onClick={() => setPeriod('week')}
-          >
-            주간
-          </button>
-          <button
-            className={`${styles.periodBtn} ${period === 'month' ? styles.periodBtnActive : ''}`}
-            onClick={() => setPeriod('month')}
-          >
-            월간
-          </button>
+        <div className={styles.headerActions}>
+          {isTeacher && (
+            <div className={styles.studentFilter}>
+              <label htmlFor="student-select" className={styles.filterLabel}>
+                👨‍🏫 학생 모니터링:
+              </label>
+              <select
+                id="student-select"
+                className={styles.filterSelect}
+                value={selectedStudentId}
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+              >
+                <option value="">나의 대시보드</option>
+                {students.map((student) => (
+                  <option key={student.user_id} value={student.user_id}>
+                    {student.name} ({student.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className={styles.periodToggle}>
+            <button
+              className={`${styles.periodBtn} ${period === 'week' ? styles.periodBtnActive : ''}`}
+              onClick={() => setPeriod('week')}
+            >
+              주간
+            </button>
+            <button
+              className={`${styles.periodBtn} ${period === 'month' ? styles.periodBtnActive : ''}`}
+              onClick={() => setPeriod('month')}
+            >
+              월간
+            </button>
+          </div>
         </div>
       </header>
 
@@ -164,7 +213,7 @@ export default function DashboardPage() {
 
       {/* AI Coach Section */}
       <section className={styles.section}>
-        <AICoachCard period={period} />
+        <AICoachCard period={period} userId={selectedStudentId || undefined} />
       </section>
 
       {/* Leaderboard Section */}

@@ -45,7 +45,7 @@ function logToBlock(l: ActualLog): TimeBlock {
   };
 }
 
-export function useCalendar() {
+export function useCalendar(selectedStudentId?: string) {
   const [blocks, setBlocks] = useState<TimeBlock[]>([]);
   const [selectedDate, setSelectedDateState] = useState<string>(todayString());
   const [isLoading, setIsLoading] = useState(true);
@@ -54,13 +54,16 @@ export function useCalendar() {
   const prevBlocksRef = useRef<TimeBlock[]>([]);
 
   // ── Fetch ────────────────────────────────────────────────────────────────
-  const fetchBlocks = useCallback(async (date: string) => {
+  const fetchBlocks = useCallback(async (date: string, studentId?: string) => {
     setIsLoading(true);
     setError(null);
     try {
+      const plansUrl = studentId ? `/api/plans?date=${date}&userId=${studentId}` : `/api/plans?date=${date}`;
+      const logsUrl = studentId ? `/api/logs?date=${date}&userId=${studentId}` : `/api/logs?date=${date}`;
+      
       const [plansRes, logsRes] = await Promise.all([
-        fetch(`/api/plans?date=${date}`),
-        fetch(`/api/logs?date=${date}`),
+        fetch(plansUrl),
+        fetch(logsUrl),
       ]);
 
       if (!plansRes.ok || !logsRes.ok) {
@@ -249,10 +252,10 @@ export function useCalendar() {
     []
   );
 
-  // Auto-fetch on mount & date change
+  // Auto-fetch on mount, date change & student change
   useEffect(() => {
-    fetchBlocks(selectedDate);
-  }, [selectedDate, fetchBlocks]);
+    fetchBlocks(selectedDate, selectedStudentId);
+  }, [selectedDate, selectedStudentId, fetchBlocks]);
 
   return {
     blocks,

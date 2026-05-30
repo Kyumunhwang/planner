@@ -173,6 +173,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const targetUserId = searchParams.get('userId');
+    let queryUserId = session.user.user_id;
+
+    if (targetUserId && targetUserId !== session.user.user_id) {
+      const isTeacher = session.user.email === 'kyumun.hwang@gmail.com';
+      if (!isTeacher) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+      }
+      queryUserId = targetUserId;
+    }
+
     const { dates, start, end } = getDateRange(period, refDate);
     const startStr = start.toISOString().split('T')[0];
     const endStr = end.toISOString().split('T')[0];
@@ -186,17 +197,17 @@ export async function GET(request: NextRequest) {
       // Plans and logs for the specific period
       const periodPlans = plansData
         .slice(1)
-        .filter((row) => row[1] === session.user.user_id && row[2] >= startStr && row[2] <= endStr)
+        .filter((row) => row[1] === queryUserId && row[2] >= startStr && row[2] <= endStr)
         .map(rowToPlan);
 
       const periodLogs = logsData
         .slice(1)
-        .filter((row) => row[1] === session.user.user_id && row[3] >= startStr && row[3] <= endStr)
+        .filter((row) => row[1] === queryUserId && row[3] >= startStr && row[3] <= endStr)
         .map(rowToLog);
 
       // All user data for streak calculation
-      const userPlans = plansData.slice(1).filter((row) => row[1] === session.user.user_id).map(rowToPlan);
-      const userLogs = logsData.slice(1).filter((row) => row[1] === session.user.user_id).map(rowToLog);
+      const userPlans = plansData.slice(1).filter((row) => row[1] === queryUserId).map(rowToPlan);
+      const userLogs = logsData.slice(1).filter((row) => row[1] === queryUserId).map(rowToLog);
 
       return { plans: periodPlans, logs: periodLogs, allPlans: userPlans, allLogs: userLogs };
     });

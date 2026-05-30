@@ -21,6 +21,31 @@ export default function CalendarPage() {
     }
   }, [status, router]);
 
+  // Teacher & Student states
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [students, setStudents] = useState<{ user_id: string; email: string; name: string }[]>([]);
+
+  const isTeacher = useMemo(() => {
+    return session?.user?.email === 'kyumun.hwang@gmail.com';
+  }, [session]);
+
+  useEffect(() => {
+    if (isTeacher) {
+      fetch('/api/students')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.students) {
+            setStudents(data.students);
+          }
+        })
+        .catch((err) => console.error('Failed to load students:', err));
+    }
+  }, [isTeacher]);
+
+  const isReadOnly = useMemo(() => {
+    return !!(selectedStudentId && selectedStudentId !== session?.user?.user_id);
+  }, [selectedStudentId, session]);
+
   // Calendar hook
   const {
     blocks,
@@ -33,7 +58,7 @@ export default function CalendarPage() {
     moveBlock,
     resizeBlock,
     setSelectedDate,
-  } = useCalendar();
+  } = useCalendar(selectedStudentId || undefined);
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,18 +85,20 @@ export default function CalendarPage() {
 
   // Action handlers
   const handleSlotClick = useCallback((slot: number) => {
+    if (isReadOnly) return;
     setSelectedBlock(undefined);
     setDefaultStartSlot(slot);
     setDefaultEndSlot(slot + 2); // default 1 hour (2 slots)
     setIsModalOpen(true);
-  }, []);
+  }, [isReadOnly]);
 
   const handleRangeSelect = useCallback((start: number, end: number) => {
+    if (isReadOnly) return;
     setSelectedBlock(undefined);
     setDefaultStartSlot(start);
     setDefaultEndSlot(end);
     setIsModalOpen(true);
-  }, []);
+  }, [isReadOnly]);
 
   const handleBlockClick = useCallback((block: TimeBlock) => {
     setSelectedBlock(block);
@@ -80,6 +107,7 @@ export default function CalendarPage() {
 
   const handleSaveBlock = useCallback(
     (blockData: Partial<TimeBlock>) => {
+      if (isReadOnly) return;
       if (blockData.id) {
         // Edit existing
         updateBlock(blockData.id, blockData);
@@ -88,14 +116,15 @@ export default function CalendarPage() {
         addBlock(blockData as Omit<TimeBlock, 'id'>);
       }
     },
-    [addBlock, updateBlock]
+    [addBlock, updateBlock, isReadOnly]
   );
 
   const handleDeleteBlock = useCallback(
     (id: string) => {
+      if (isReadOnly) return;
       deleteBlock(id);
     },
-    [deleteBlock]
+    [deleteBlock, isReadOnly]
   );
 
   if (status === 'loading' || (status === 'unauthenticated')) {
@@ -129,9 +158,30 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      {/* ── Date Navigator ── */}
+      {/* ── Date Navigator & Student Selector ── */}
       <div className={styles.navSection}>
         <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
+        
+        {isTeacher && (
+          <div className={styles.studentFilter}>
+            <label htmlFor="student-select" className={styles.filterLabel}>
+              👨‍🏫 학생 모니터링:
+            </label>
+            <select
+              id="student-select"
+              className={styles.filterSelect}
+              value={selectedStudentId}
+              onChange={(e) => setSelectedStudentId(e.target.value)}
+            >
+              <option value="">나의 캘린더</option>
+              {students.map((student) => (
+                <option key={student.user_id} value={student.user_id}>
+                  {student.name} ({student.email})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* ── Error message ── */}
@@ -162,8 +212,8 @@ export default function CalendarPage() {
             onSlotClick={handleSlotClick}
             onRangeSelect={handleRangeSelect}
             onBlockClick={handleBlockClick}
-            onBlockMove={moveBlock}
-            onBlockResize={resizeBlock}
+            onBlockMove={isReadOnly ? () => {} : moveBlock}
+            onBlockResize={isReadOnly ? () => {} : resizeBlock}
           />
         )}
       </div>
@@ -177,6 +227,7 @@ export default function CalendarPage() {
         block={selectedBlock}
         defaultStartSlot={defaultStartSlot}
         defaultEndSlot={defaultEndSlot}
+        readOnly={isReadOnly}
       />
     </div>
   );

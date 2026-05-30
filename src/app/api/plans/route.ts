@@ -38,13 +38,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'date 파라미터가 필요합니다.' }, { status: 400 });
     }
 
+    const targetUserId = searchParams.get('userId');
+    let queryUserId = session.user.user_id;
+
+    if (targetUserId && targetUserId !== session.user.user_id) {
+      const isTeacher = session.user.email === 'kyumun.hwang@gmail.com';
+      if (!isTeacher) {
+        return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+      }
+      queryUserId = targetUserId;
+    }
+
     const plans = await requestQueue.enqueue(async () => {
       const data = await getSheetData('SCHEDULE_PLANS');
       if (data.length <= 1) return []; // header only
 
       return data
         .slice(1) // skip header
-        .filter((row) => row[1] === session.user.user_id && row[2] === date)
+        .filter((row) => row[1] === queryUserId && row[2] === date)
         .map(rowToPlan);
     });
 

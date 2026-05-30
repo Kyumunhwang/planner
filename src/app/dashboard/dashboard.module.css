@@ -26,6 +26,47 @@
   background-clip: text;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.studentFilter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-glass);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+}
+
+.filterLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  white-space: nowrap;
+}
+
+.filterSelect {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filterSelect:focus {
+  border-color: var(--accent-primary);
+}
+
 .periodToggle {
   display: flex;
   gap: var(--space-xs);
@@ -181,6 +222,18 @@
     flex-direction: column;
     gap: var(--space-md);
     align-items: flex-start;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: var(--space-sm);
+  }
+
+  .studentFilter {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .dashboardContainer {
