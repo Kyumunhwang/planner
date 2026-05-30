@@ -138,3 +138,21 @@
     left: 34px;
   }
 }
+
+/* ── Vertical Divider ── */
+.verticalDivider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% + 28px);
+  width: 1px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .verticalDivider {
+    left: calc(50% + 22px);
+  }
+}

@@ -155,6 +155,8 @@ export default function TimeBlockComponent({
       style={{
         top: `${dynamicTop}px`,
         height: `${Math.max(dynamicHeight, SLOT_HEIGHT)}px`,
+        left: isPlan ? '8px' : 'calc(50% + 4px)',
+        right: isPlan ? 'calc(50% + 4px)' : '8px',
         borderLeftColor: categoryColor,
         ['--cat-color' as string]: categoryColor,
       }}

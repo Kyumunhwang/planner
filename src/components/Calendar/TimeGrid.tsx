@@ -140,6 +140,8 @@ export default function TimeGrid({
         className={styles.gridInner}
         style={{ height: `${TOTAL_SLOTS * SLOT_HEIGHT}px` }}
       >
+        {/* 좌우 구분 세로 가이드선 (계획 / 기록 구분용) */}
+        <div className={styles.verticalDivider} />
         {/* ── Time labels + grid rows ── */}
         {Array.from({ length: TOTAL_SLOTS }, (_, i) => {
           const hourLabel = getHourLabel(i);
