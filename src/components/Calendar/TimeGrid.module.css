@@ -1,0 +1,140 @@
+/* ── Container ────────────────────────────────────────────── */
+.container {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+/* ── Grid inner (sized to all 48 rows) ───────────────────── */
+.gridInner {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ── Row ──────────────────────────────────────────────────── */
+.row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.hourRow {
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+.halfRow {
+  border-bottom-color: rgba(255, 255, 255, 0.03);
+}
+
+.pmRow .cell {
+  background: rgba(255, 255, 255, 0.008);
+}
+
+/* ── Time Gutter ─────────────────────────────────────────── */
+.gutter {
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 12px;
+  padding-top: 0;
+  position: relative;
+}
+
+.timeLabel {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1;
+  transform: translateY(-6px);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ── Cell ─────────────────────────────────────────────────── */
+.cell {
+  flex: 1;
+  min-height: 0;
+  border-left: 1px solid var(--border);
+}
+
+/* ── Blocks Layer ────────────────────────────────────────── */
+.blocksLayer {
+  position: absolute;
+  top: 0;
+  left: 56px;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+/* Let children receive pointer events */
+.blocksLayer > * {
+  pointer-events: auto;
+}
+
+/* ── Selection Overlay ───────────────────────────────────── */
+.selectionOverlay {
+  position: absolute;
+  left: 56px;
+  right: 0;
+  background: rgba(108, 140, 255, 0.12);
+  border: 1px dashed rgba(108, 140, 255, 0.4);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Current Time Indicator ──────────────────────────────── */
+.currentTime {
+  position: absolute;
+  left: 44px;
+  right: 0;
+  height: 0;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.currentTimeDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  flex-shrink: 0;
+  margin-left: -5px;
+}
+
+.currentTimeLine {
+  flex: 1;
+  height: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .gutter {
+    width: 44px;
+    padding-right: 8px;
+  }
+  .timeLabel {
+    font-size: 0.62rem;
+  }
+  .blocksLayer {
+    left: 44px;
+  }
+  .currentTime {
+    left: 34px;
+  }
+}

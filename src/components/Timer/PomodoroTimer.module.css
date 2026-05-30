@@ -1,0 +1,174 @@
+.timerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  background: var(--bg-glass);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.blockTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+  background: hsla(255, 90%, 65%, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid hsla(255, 90%, 65%, 0.2);
+}
+
+.progressContainer {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progressSvg {
+  transform: rotate(-90deg);
+}
+
+.bgCircle {
+  fill: none;
+  stroke: var(--bg-tertiary);
+}
+
+.fgCircle {
+  fill: none;
+  stroke: var(--accent-primary);
+  transition: stroke-dashoffset 0.3s ease, stroke var(--transition);
+}
+
+.timeDisplay {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeText {
+  font-size: 38px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btnStart {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, hsl(275, 85%, 55%) 100%);
+  color: white;
+  box-shadow: 0 4px 12px hsla(255, 90%, 65%, 0.3);
+}
+
+.btnStart:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px hsla(255, 90%, 65%, 0.4);
+}
+
+.btnPause {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btnPause:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-hover);
+}
+
+.btnReset {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btnReset:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+/* State changes */
+.normal .fgCircle {
+  stroke: var(--accent-primary);
+  filter: drop-shadow(0 0 4px hsla(255, 90%, 65%, 0.5));
+}
+
+.warning .fgCircle {
+  stroke: var(--accent-warn);
+  filter: drop-shadow(0 0 6px hsla(35, 95%, 60%, 0.5));
+}
+
+.warning .timeText {
+  color: var(--accent-warn);
+}
+
+.danger .fgCircle {
+  stroke: var(--accent-danger);
+  filter: drop-shadow(0 0 8px hsla(0, 80%, 60%, 0.6));
+  animation: pulseGlow 1s infinite alternate;
+}
+
+.danger .timeText {
+  color: var(--accent-danger);
+  animation: pulseText 0.5s infinite alternate;
+}
+
+.completed {
+  animation: completePulse 1.5s infinite alternate;
+}
+
+.completed .fgCircle {
+  stroke: var(--accent-success);
+}
+
+@keyframes pulseGlow {
+  from { filter: drop-shadow(0 0 4px hsla(0, 80%, 60%, 0.4)); }
+  to { filter: drop-shadow(0 0 12px hsla(0, 80%, 60%, 0.8)); }
+}
+
+@keyframes pulseText {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+@keyframes completePulse {
+  0% { box-shadow: 0 0 0 0px hsla(145, 70%, 50%, 0.2); }
+  100% { box-shadow: 0 0 20px 10px hsla(145, 70%, 50%, 0.0); }
+}
