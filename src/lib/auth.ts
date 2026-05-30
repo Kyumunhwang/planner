@@ -75,20 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return true;
         }
 
-        // 신규 사용자: 전체 사용자 수 확인
-        const allUsers = await getSheetData('USERS');
-        // 헤더 제외
-        const userCount = Math.max(0, allUsers.length - 1);
-
-        if (userCount >= 10) {
-          // 최대 인원(10명) 초과 → 가입 거부
-          console.warn(
-            `[Auth] 최대 사용자 수 초과로 가입 거부: ${email}`
-          );
-          return false;
-        }
-
-        // 자동 등록
+        // 신규 사용자: 자동 등록
         const userId = generateUserId();
         const now = new Date().toISOString();
 

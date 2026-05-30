@@ -89,8 +89,8 @@ export default function LoginPage() {
             </svg>
           </div>
           <p className={styles.noticeText}>
-            이 시스템은 비공개 초대 형식으로 운영됩니다.<br />
-            가입 제한 인원은 최대 10명입니다.
+            이 시스템은 모든 학생에게 공개되어 있습니다.<br />
+            구글 계정으로 손쉽게 로그인하여 바로 시작해 보세요.
           </p>
         </div>
       </div>
