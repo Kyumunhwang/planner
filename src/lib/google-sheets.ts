@@ -49,11 +49,21 @@ function getAuth(): JWT {
   if (jwtClient) return jwtClient;
 
   const email = getEnvVar('GOOGLE_SERVICE_ACCOUNT_EMAIL');
-  const privateKey = getEnvVar('GOOGLE_PRIVATE_KEY').replace(/\\n/g, '\n');
+  let privateKey = getEnvVar('GOOGLE_PRIVATE_KEY');
+
+  // Vercel 등에 등록 시 앞뒤 큰따옴표(")나 작은따옴표(')가 포함되어 들어온 경우 제거
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.substring(1, privateKey.length - 1);
+  }
+  if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+    privateKey = privateKey.substring(1, privateKey.length - 1);
+  }
+
+  const formattedKey = privateKey.replace(/\\n/g, '\n');
 
   jwtClient = new JWT({
     email,
-    key: privateKey,
+    key: formattedKey,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 

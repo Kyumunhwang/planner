@@ -19,7 +19,7 @@ function getGeminiClient(): GoogleGenerativeAI {
 function getModel() {
   const client = getGeminiClient();
   return client.getGenerativeModel({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       responseMimeType: 'application/json',
       temperature: 0.3,
